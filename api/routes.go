@@ -1,8 +1,10 @@
 package api
 
 import (
+	"context"
 	"tinderutf/api/handlers"
 	"tinderutf/api/middlewares"
+	"tinderutf/api/websocket"
 )
 
 func (s *Server) setupRoutes() {
@@ -29,5 +31,12 @@ func (s *Server) setupRoutes() {
 		interactions.GET("/", handlers.FindPeople)
 		interactions.GET("/liked", handlers.ShowLiked)
 		interactions.GET("/matches", handlers.ShowMatches)
+		interactions.POST("", handlers.Interact)
+		interactions.POST("/cancel", handlers.CancelInteraction)
 	}
+
+	hub := websocket.NewHub()
+	go hub.StartServer(context.Background())
+	
+	v1.GET("/subscribe", middlewares.Auth(), handlers.Subscribe(hub))
 }
